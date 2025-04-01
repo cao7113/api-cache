@@ -1,0 +1,5 @@
+# https://taskfile.dev/usage/
+version: '3'
+tasks:
+  default: echo hi task
+  dev: bun dev
