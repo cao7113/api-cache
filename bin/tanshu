@@ -1,0 +1,79 @@
+#! /usr/bin/env bun
+
+import { Command } from "commander";
+import TanshuApi from "../src/tanshu/api";
+import { version } from "../../package.json";
+import { ApiEndpoint } from "../src/tanshu/types";
+import { J } from "vitest/dist/chunks/reporters.d.CfRkRKN2.js";
+
+const demoISBN = process.env.DEMO_ISBN;
+const tanshuApiKey = process.env.TANSHU_API_KEY;
+if (!tanshuApiKey) {
+  throw new Error("TANSHU_API_KEY is not defined");
+}
+
+// https://github.com/tj/commander.js?tab=readme-ov-file#commanderjs
+const program = new Command()
+  .name("tanshu")
+  .description("Tanshu API CLI")
+  .version(version);
+
+program
+  .command("info")
+  .description("Get Book info from ISBN")
+  .action(async () => {
+    const info = {
+      host: process.env.TANSHU_API_HOST,
+      key: tanshuApiKey,
+    };
+    console.info(info);
+  });
+
+program
+  .command("book")
+  .description("Get Book info from ISBN")
+  .alias("b")
+  .argument("[string]", "13-number ISBN")
+  .option("-r, --remote", "force use remote and ignore local cache", false)
+  .option("-c, --cache", "use cache when available", true)
+  .option("-f, --fallbackWhenMiss", "fallback remote when miss match", true)
+  .option("-p, --pro", "use pro endpoint(pricing)", false)
+  .option("-v, --verbose", "verbose log", false)
+  .action(async (isbn, opts) => {
+    isbn = isbn || demoISBN;
+    const endpoint = opts.pro ? ApiEndpoint.IsbnPro : ApiEndpoint.IsbnBase;
+    const client = new TanshuApi(tanshuApiKey, opts.verbose);
+    const info = await client.getBookInfo(isbn, endpoint, {
+      forceRemote: opts.remote,
+      useCache: opts.cache,
+      fallbackWhenMissCache: opts.fallbackWhenMiss,
+      verbose: opts.verbose,
+    });
+    console.log(info);
+  });
+
+program
+  .command("isbn")
+  .description("Get ISBN info")
+  .alias("i")
+  .argument("[string]", "13-number ISBN")
+  .option("-r, --remote", "force use remote and ignore local cache", false)
+  .option("-c, --cache", "use cache when available", true)
+  .option("-f, --fallbackWhenMiss", "fallback remote when miss match", true)
+  .option("-p, --pro", "use pro endpoint(pricing)", false)
+  .option("-v, --verbose", "verbose log", false)
+  .action(async (isbn, opts) => {
+    isbn = isbn || demoISBN;
+    const endpoint = opts.pro ? ApiEndpoint.IsbnPro : ApiEndpoint.IsbnBase;
+    const client = new TanshuApi(tanshuApiKey, opts.verbose);
+    const resp = await client.getIsbnInfo(isbn, endpoint, {
+      forceRemote: opts.remote,
+      useCache: opts.cache,
+      fallbackWhenMissCache: opts.fallbackWhenMiss,
+      verbose: opts.verbose,
+    });
+    const info = await resp.json();
+    console.log(JSON.stringify(info, null, 2));
+  });
+
+program.parse();

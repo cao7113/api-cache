@@ -1,12 +1,26 @@
 {
   "name": "api-cache",
+  "version": "0.0.1",
+  "description": "API Cache for external service",
+  "type": "module",
   "scripts": {
-    "dev": "bun run --hot src/index.ts"
+    "start": "bun run src/index.ts",
+    "dev": "bun run --hot src/index.ts",
+    "test": "bunx vitest run",
+    "test:watch": "bunx vitest"
   },
   "dependencies": {
+    "@hono/swagger-ui": "^0.5.1",
+    "@hono/zod-openapi": "^0.19.2",
+    "drizzle-orm": "^0.41.0",
+    "drizzle-seed": "^0.3.1",
     "hono": "^4.7.5"
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "^1.2.8",
+    "better-sqlite3": "^11.9.1",
+    "drizzle-kit": "^0.30.6",
+    "commander": "^13.1.0",
+    "vitest": "latest"
   }
 }

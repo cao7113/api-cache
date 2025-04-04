@@ -1,0 +1,22 @@
+#! /usr/bin/env bun
+import { Command } from "commander";
+import { version } from "../../package.json";
+
+// https://github.com/tj/commander.js?tab=readme-ov-file#commanderjs
+const program = new Command()
+  .name("cache")
+  .description("Cache management CLI")
+  .version(version);
+
+program
+  .command("info")
+  .description("Get Cache info")
+  .alias("i")
+  .option("-l, --limit <number>", "items count", "1")
+  .option("-v, --verbose", "verbose log", false)
+  .action(async (opts) => {
+    console.log("Cache functionality is not available when using direct API");
+    console.log("Please use the web API endpoint for cache operations");
+  });
+
+program.parse();

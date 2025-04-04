@@ -1,4 +1,6 @@
-# API cache
+# API Cache
+
+External service middle cache to save limit!
 
 ## Getting Started
 

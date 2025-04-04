@@ -1,5 +1,32 @@
 # https://taskfile.dev/usage/
 version: '3'
 tasks:
-  default: echo hi task
+  default: bunx vitest run
   dev: bun dev
+  # bunx vitest run -t "should fallback to remote when data not found in cache"
+
+  ## DB
+  db-push:  bunx drizzle-kit push
+  db-gen: bunx drizzle-kit generate
+  db-mig: bunx drizzle-kit migrate
+
+  db-reset: |
+    rm -fr db/api-cache.sqlite
+    bunx drizzle-kit push
+    bun run src/db/fake.ts
+
+  # https://orm.drizzle.team/drizzle-studio/overview
+  # By default, Drizzle Studio will be launched on the https://local.drizzle.studio host, and studio server will be launched on 127.0.0.1 host but you can specify any host you want yarn drizzle-kit studio --host 0.0.0.0
+  db-ui: |
+    bunx drizzle-kit studio # --port 3000 --verbose
+
+  setup: |
+    # https://orm.drizzle.team/docs/get-started/bun-sqlite-new
+    bun add drizzle-orm
+    bun add -D drizzle-kit @types/bun
+    bun add drizzle-seed
+
+    # Drizzle Kit需要
+    bun add better-sqlite3 -d
+
+    bun add @hono/zod-openapi @hono/swagger-ui commander
