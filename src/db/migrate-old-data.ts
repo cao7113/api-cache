@@ -1,7 +1,7 @@
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 import { drizzle } from "drizzle-orm/bun-sqlite";
-import { db } from "../src/db/sqlite-setup";
-import { remoteResponsesTable } from "../src/db/schema";
+import { db } from "./sqlite-setup";
+import { remoteResponsesTable } from "./schema";
 
 const oldDbFile = "db/tanshu-old-cache.sqlite";
 const oldDb = drizzle(oldDbFile);
@@ -43,8 +43,8 @@ async function moveData() {
       `[${idx}] inserted ISBN ${key} ${value.data?.title} ${timestamp}`
     );
   }
-  const count = await oldDb.$count(oldCacheTable);
-  console.log(`total rows count: ${count}`);
+  const count = await db?.$count(remoteResponsesTable);
+  console.log(`new-db total rows count: ${count}`);
 }
 
 moveData();

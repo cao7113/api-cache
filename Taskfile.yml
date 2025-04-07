@@ -9,16 +9,31 @@ tasks:
   db-push:  bunx drizzle-kit push
   db-gen: bunx drizzle-kit generate
   db-mig: bunx drizzle-kit migrate
-
-  db-reset: |
-    rm -fr db/api-cache.sqlite
-    bunx drizzle-kit push
-    bun run src/db/fake.ts
-
+  db-setup: |
+    rm -fr db/remote-cache.sqlite
+    # bunx drizzle-kit push
+    # bun run src/db/fake.ts
+    bun src/db/migrate-old-data.ts
   # https://orm.drizzle.team/drizzle-studio/overview
   # By default, Drizzle Studio will be launched on the https://local.drizzle.studio host, and studio server will be launched on 127.0.0.1 host but you can specify any host you want yarn drizzle-kit studio --host 0.0.0.0
   db-ui: |
     bunx drizzle-kit studio # --port 3000 --verbose
+
+  
+  cache: |
+    curl -H "Authorization: Bearer {{.BEARER_AUTH_TOKEN}}" {{.API_HOST}}/books/remote/cache | jq
+
+  ## Fly.io
+  f-who: fly auth whoami
+  f-dep: fly deploy --verbose
+
+  f-mk-vol: fly volumes create appdata --size 1 --region sin
+  # 限制单实例，启用自动重启
+  # fly scale count 1 --max-per-region 1
+  # fly deploy --ha=false
+  # fly ssh sftp shell
+  # put db/remote-cache.sqlite /opt/data/remote-cache.sqlite
+  f-get-cache: fly ssh sftp get /opt/data/remote-cache.sqlite
 
   setup: |
     # https://orm.drizzle.team/docs/get-started/bun-sqlite-new
@@ -29,4 +44,5 @@ tasks:
     # Drizzle Kit需要
     bun add better-sqlite3 -d
 
-    bun add @hono/zod-openapi @hono/swagger-ui commander
+    bun add @hono/zod-openapi @hono/swagger-ui 
+    bun add commander -d

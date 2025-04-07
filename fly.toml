@@ -11,6 +11,7 @@ primary_region = 'sin'
 [env]
   PORT = '8080'
   TANSHU_API_HOST = 'https://api.tanshuapi.com'
+  DB_FILE_PATH = "/opt/data/remote-cache.sqlite"
 
 [http_service]
   internal_port = 8080
@@ -24,3 +25,7 @@ primary_region = 'sin'
   memory = '512mb'
   cpu_kind = 'shared'
   cpus = 1
+
+[mount]
+  source = "appdata"
+  destination = "/opt/data"
