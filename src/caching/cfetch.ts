@@ -20,6 +20,8 @@ export const defaultOpts: FetchOpts = {
 };
 
 // cached fetch
+// Note: should always return Response instance as original `fetch`
+// require json response
 // https://github.com/unjs/ofetch
 export async function cfetch(
   url: string,
@@ -41,10 +43,10 @@ export async function cfetch(
   let needRemote = forceRemote;
 
   if (useCache && !forceRemote) {
-    const resp = await cacheClient.getFromCache(ckeys);
-    if (resp) {
-      if (verbose) console.info(`hit cache ${resp} and return`);
-      return new Response(resp);
+    const respData = await cacheClient.getFromCache(ckeys);
+    if (respData) {
+      if (verbose) console.info(`hit cache ${respData} and return`);
+      return Response.json(respData);
     } else {
       if (verbose) console.info(`miss cache and fallback`);
       needRemote = fallbackWhenMissCache;

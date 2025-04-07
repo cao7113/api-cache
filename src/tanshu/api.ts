@@ -20,8 +20,33 @@ export default class Api implements BookInfoProvider {
     this.verbose = verbose;
   }
 
-  // get raw isbn info
   async getIsbnInfo(
+    isbn: string,
+    reqPath: ApiEndpoint = ApiEndpoint.IsbnBase,
+    opts: OptionalFetchOpts = { verbose: this.verbose }
+  ): Promise<TsBookResp> {
+    const resp = await this.getIsbnResponse(isbn, reqPath, opts);
+    const info = (await resp.json()) as TsBookResp;
+    return info;
+  }
+
+  async getBookInfo(
+    isbn: string,
+    reqPath: ApiEndpoint = ApiEndpoint.IsbnBase,
+    opts: OptionalFetchOpts = { verbose: this.verbose }
+  ): Promise<BookData> {
+    const info = await this.getIsbnInfo(isbn, reqPath, opts);
+
+    if (info.code !== 1) {
+      if (this.verbose) {
+        console.error(JSON.stringify(info, null, 2));
+      }
+      throw new Error(`Failed to fetch ISBN ${info.msg}`);
+    }
+    return info.data;
+  }
+
+  async getIsbnResponse(
     isbn: string,
     reqPath: ApiEndpoint = ApiEndpoint.IsbnBase,
     opts: OptionalFetchOpts = { verbose: this.verbose }
@@ -31,29 +56,5 @@ export default class Api implements BookInfoProvider {
 
     const ckeys = { vendor: VENDOR_NAME, path: reqPath, pathKey: isbn };
     return await cfetch(url, ckeys, opts);
-  }
-
-  async getBookInfo(
-    isbn: string,
-    reqPath: ApiEndpoint = ApiEndpoint.IsbnBase,
-    opts: OptionalFetchOpts = { verbose: this.verbose }
-  ): Promise<BookData> {
-    const resp = await this.getIsbnInfo(isbn, reqPath, opts);
-
-    if (!resp.ok) {
-      if (this.verbose) {
-        console.error(JSON.stringify(resp, null, 2));
-      }
-      throw new Error(`Failed to fetch ISBN ${isbn}`);
-    }
-
-    const info: TsBookResp = await resp.json();
-    if (info.code !== 1) {
-      if (this.verbose) {
-        console.error(JSON.stringify(resp, null, 2));
-      }
-      throw new Error(`Failed to fetch ISBN ${info.msg}`);
-    }
-    return info.data;
   }
 }

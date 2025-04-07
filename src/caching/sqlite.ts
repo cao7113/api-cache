@@ -36,7 +36,7 @@ export class SqliteCacheClient implements CacheClient {
           vendor: vendor,
           path: path,
           pathKey: pathKey,
-          responseData: JSON.stringify(value),
+          responseData: value,
           timestamp: timestamp,
         })
         .onConflictDoUpdate({
@@ -46,7 +46,7 @@ export class SqliteCacheClient implements CacheClient {
             remoteResponsesTable.pathKey,
           ],
           set: {
-            responseData: JSON.stringify(value),
+            responseData: value,
             timestamp: timestamp,
           },
         });

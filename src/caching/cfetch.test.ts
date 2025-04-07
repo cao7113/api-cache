@@ -44,7 +44,8 @@ describe("cfetch", () => {
   it("use remote if forceRemote=true and ignore cache", async () => {
     // Mock cache hit
     vi.mocked(cacheClient.getFromCache).mockResolvedValue(
-      JSON.stringify(mockResponseData)
+      // JSON.stringify(mockResponseData)
+      mockResponseData
     );
     // Mock a successful fetch response
     global.fetch = vi.fn().mockResolvedValue({
@@ -68,7 +69,8 @@ describe("cfetch", () => {
   it("should return cached data when available and fallbackWhenMissCache=true", async () => {
     // Mock cache hit
     vi.mocked(cacheClient.getFromCache).mockResolvedValue(
-      JSON.stringify(mockResponseData)
+      // JSON.stringify(mockResponseData)
+      mockResponseData
     );
 
     const response = await cfetch(mockUrl, mockCacheKeys);
@@ -83,7 +85,8 @@ describe("cfetch", () => {
   it("should return cached data when available and fallbackWhenMissCache=false", async () => {
     // Mock cache hit
     vi.mocked(cacheClient.getFromCache).mockResolvedValue(
-      JSON.stringify(mockResponseData)
+      // JSON.stringify(mockResponseData)
+      mockResponseData
     );
 
     const response = await cfetch(mockUrl, mockCacheKeys, {
@@ -114,7 +117,9 @@ describe("cfetch", () => {
     // Mock cache miss
     vi.mocked(cacheClient.getFromCache).mockResolvedValue(null);
 
-    const opts = { verbose: true };
+    const opts = {
+      // verbose: true,
+    };
     const response = await cfetch(mockUrl, mockCacheKeys, opts);
 
     expect(cacheClient.getFromCache).toHaveBeenCalledWith(mockCacheKeys);

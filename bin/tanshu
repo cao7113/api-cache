@@ -1,10 +1,9 @@
 #! /usr/bin/env bun
 
 import { Command } from "commander";
-import TanshuApi from "../src/tanshu/api";
+import Api from "../src/tanshu/api";
 import { version } from "../../package.json";
 import { ApiEndpoint } from "../src/tanshu/types";
-import { J } from "vitest/dist/chunks/reporters.d.CfRkRKN2.js";
 
 const demoISBN = process.env.DEMO_ISBN;
 const tanshuApiKey = process.env.TANSHU_API_KEY;
@@ -42,14 +41,15 @@ program
   .action(async (isbn, opts) => {
     isbn = isbn || demoISBN;
     const endpoint = opts.pro ? ApiEndpoint.IsbnPro : ApiEndpoint.IsbnBase;
-    const client = new TanshuApi(tanshuApiKey, opts.verbose);
+    const client = new Api(tanshuApiKey, opts.verbose);
     const info = await client.getBookInfo(isbn, endpoint, {
       forceRemote: opts.remote,
       useCache: opts.cache,
       fallbackWhenMissCache: opts.fallbackWhenMiss,
       verbose: opts.verbose,
     });
-    console.log(info);
+    console.info(info);
+    // console.log(JSON.stringify(info, null, 2));
   });
 
 program
@@ -65,15 +65,15 @@ program
   .action(async (isbn, opts) => {
     isbn = isbn || demoISBN;
     const endpoint = opts.pro ? ApiEndpoint.IsbnPro : ApiEndpoint.IsbnBase;
-    const client = new TanshuApi(tanshuApiKey, opts.verbose);
-    const resp = await client.getIsbnInfo(isbn, endpoint, {
+    const client = new Api(tanshuApiKey, opts.verbose);
+    const info = await client.getIsbnInfo(isbn, endpoint, {
       forceRemote: opts.remote,
       useCache: opts.cache,
       fallbackWhenMissCache: opts.fallbackWhenMiss,
       verbose: opts.verbose,
     });
-    const info = await resp.json();
-    console.log(JSON.stringify(info, null, 2));
+    console.info(info);
+    // console.log(JSON.stringify(info, null, 2));
   });
 
 program.parse();

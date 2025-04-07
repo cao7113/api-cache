@@ -4,29 +4,26 @@ import { env } from "hono/adapter";
 
 // NOTE: The z object should be imported from @hono/zod-openapi other than from hono
 import { z, createRoute, OpenAPIHono } from "@hono/zod-openapi";
-import TanshuApi from "./api";
-import { cacheClient } from "../caching";
+import Api from "./api";
+import { ApiEndpoint } from "./types";
 
 // Specify the variable types to infer the `c.get('jwtPayload')`:
 type Variables = JwtVariables;
 
 const addClients = createMiddleware(async (c, next) => {
   const envs = env(c);
-  // Create direct API client
-  const clientApi = new TanshuApi(envs.TANSHU_API_KEY);
-  c.set("clientApi", clientApi);
-  c.set("cacheClient", cacheClient);
-
+  const apiClient: Api = new Api(envs.TANSHU_API_KEY);
+  c.set("apiClient", apiClient);
   await next();
 });
 
 export const app = new OpenAPIHono<{
   Variables: Variables;
 }>()
-  // get remote book-info
+  // get book-info
   .openapi(
     createRoute({
-      summary: "Get basic book info by isbn",
+      summary: "Get book info by isbn",
       tags: ["Tanshu"],
       method: "get",
       path: "/isbn/{isbn}",
@@ -34,8 +31,9 @@ export const app = new OpenAPIHono<{
         params: z.object({
           isbn: z
             .string()
-            .min(10)
-            .max(13)
+            .length(13)
+            // .min(10)
+            // .max(13)
             .openapi({
               param: {
                 name: "isbn",
@@ -45,13 +43,22 @@ export const app = new OpenAPIHono<{
             }),
         }),
         query: z.object({
-          cached: z.string().openapi({
+          // enum support?
+          path: z.string().openapi({
             param: {
-              name: "cached",
+              name: "path",
               in: "query",
             },
-            example: "true",
+            example: ApiEndpoint.IsbnBase,
           }),
+          // boolean suuport
+          // cached: z.string().openapi({
+          //   param: {
+          //     name: "cached",
+          //     in: "query",
+          //   },
+          //   example: "true",
+          // }),
         }),
       },
       security: [
@@ -68,68 +75,12 @@ export const app = new OpenAPIHono<{
     }),
     async (c) => {
       const { isbn } = c.req.valid("param");
-      const { cached } = c.req.valid("query");
-      const clientApi = c.get("clientApi");
+      const { path } = c.req.valid("query");
+      const apiClient = c.get("apiClient");
 
-      // If cached=true, use the caching mechanism
-      if (cached === "true") {
-        const cacheClient = c.get("cacheClient");
-        if (cacheClient) {
-          const bookInfo = await cachedFetch(
-            cacheClient,
-            "tanshu",
-            "/api/isbn_base/v1/index",
-            () => clientApi.getIsbnInfo(isbn),
-            isbn,
-            { debug: true }
-          );
-          return c.json(bookInfo);
-        }
-      }
-
-      // Default to direct API call
-      const bookInfo = await clientApi.getIsbnInfo(isbn);
-      return c.json(bookInfo);
-    }
-  )
-  // get remote cache info
-  .openapi(
-    createRoute({
-      summary: "Get cache info",
-      tags: ["Tanshu"],
-      method: "get",
-      path: "/cache",
-      request: {},
-      security: [
-        {
-          Bearer: [],
-        },
-      ],
-      middleware: [addClients],
-      responses: {
-        200: {
-          description: "Success message",
-        },
-      },
-    }),
-    async (c) => {
-      const cacheClient = c.get("cacheClient");
-      if (!cacheClient) {
-        return c.json({ error: "Cache client not available" });
-      }
-
-      try {
-        const info = await cacheClient.getCacheInfo(
-          "/api/isbn_base/v1/index",
-          3
-        );
-        return c.json(info);
-      } catch (error) {
-        return c.json({
-          error: "Failed to get cache info",
-          details: String(error),
-        });
-      }
+      // todo add opts
+      const resp = await apiClient.getIsbnResponse(isbn, path);
+      return resp;
     }
   )
   // welcome

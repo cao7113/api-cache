@@ -1,6 +1,6 @@
 import { Database } from "bun:sqlite";
 import { drizzle } from "drizzle-orm/bun-sqlite";
-import * as schema from "./schema";
+import { migrate } from "drizzle-orm/bun-sqlite/migrator";
 
 // https://bun.sh/guides/ecosystem/drizzle
 
@@ -18,9 +18,15 @@ dbRaw = new Database(dbFilePath);
 // db = drizzle({ client: dbRaw });
 db = drizzle(dbRaw);
 
-// Initialize schema
-// todo fix this to avoid: task db-push ???
-// dbRaw.exec(schema.remoteResponsesTable.toSQL().toString());
+// Run migration at runtime as option-4 from https://orm.drizzle.team/docs/migrations
+console.log(`Running migrations on ${dbFilePath}...`);
+try {
+  migrate(db, { migrationsFolder: "./drizzle" });
+  console.log("Migrations completed successfully");
+} catch (error) {
+  console.error("Error running migrations:", error);
+  throw error;
+}
 
 // Export database components
 export { db, dbRaw, dbFilePath };
