@@ -1,13 +1,21 @@
 # https://taskfile.dev/usage/
 version: '3'
+dotenv:
+  # first over last? ENV=prod task hi
+  - .env.{{.ENV}}
+  # - .env.${ENV}
+  - .env
 tasks:
   default: bunx vitest run
   dev: bun dev
   # bunx vitest run -t "should fallback to remote when data not found in cache"
 
   dist: bun build src/index.ts --outdir dist --minify --target bun
-  build: bun build src/index.ts --outdir dist --target bun
   run-dist: bun run dist/index.js
+  build: bun build src/index.ts --outdir dist --target bun
+
+  hi: |
+    curl -H "Authorization: Bearer {{.BEARER_AUTH_TOKEN}}" {{.API_HOST}}/tanshu/hi | jq
 
   ## DB
   db-push:  bunx drizzle-kit push
@@ -23,8 +31,7 @@ tasks:
   db-ui: |
     bunx drizzle-kit studio # --port 3000 --verbose
 
-  hi: |
-    curl -H "Authorization: Bearer {{.BEARER_AUTH_TOKEN}}" {{.API_HOST}}/tanshu/hi | jq
+
 
   ## Docker
   dk-build: docker build -t api-cache .
@@ -39,7 +46,6 @@ tasks:
   ## Fly.io
   f-who: fly auth whoami
   f-dep: fly deploy --verbose
-
   f-mk-vol: fly volumes create appdata --size 1 --region sin
   # 限制单实例，启用自动重启
   # fly scale count 1 --max-per-region 1
@@ -47,6 +53,11 @@ tasks:
   f-ftp: fly ssh sftp shell
   # put db/remote-cache.sqlite /opt/data/remote-cache.sqlite
   f-get-cache: fly ssh sftp get /opt/data/remote-cache.sqlite
+
+  ## Github Actions
+  # https://fly.io/docs/launch/continuous-deployment-with-github-actions/#speed-run-your-way-to-continuous-deployment
+  f-gen-token: fly tokens create deploy -x 999999h
+  # set https://github.com/cao7113/api-cache/settings/secrets/actions
 
   setup: |
     # https://orm.drizzle.team/docs/get-started/bun-sqlite-new
