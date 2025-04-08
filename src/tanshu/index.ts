@@ -79,7 +79,9 @@ export const app = new OpenAPIHono<{
       const apiClient = c.get("apiClient");
 
       // todo add opts
-      const resp = await apiClient.getIsbnResponse(isbn, path);
+      const resp = await apiClient.getIsbnResponse(isbn, path, {
+        verbose: true,
+      });
       return resp;
     }
   )

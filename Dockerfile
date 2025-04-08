@@ -13,7 +13,9 @@ ENV NODE_ENV=production
 COPY package.json bun.lock* ./
 
 # 安装项目依赖
-RUN bun install
+# "--production" 表示只安装 dependencies 中的依赖，不安装 devDependencies
+# 这样可以减小最终镜像的大小，因为开发环境的依赖（如测试库）不会被安装
+RUN bun install --production
 
 # 复制项目全部代码
 COPY . .
@@ -34,6 +36,8 @@ ENV NODE_ENV=production
 
 # 复制编译好的文件
 COPY --from=builder /app/dist ./dist
+# support runtime migration
+COPY --from=builder /app/drizzle ./drizzle
 
 # 默认开放端口（可根据代码中的设置，Hono 配置默认端口通常为 8080 或其它）
 EXPOSE 8080

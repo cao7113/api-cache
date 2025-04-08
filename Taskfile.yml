@@ -5,6 +5,10 @@ tasks:
   dev: bun dev
   # bunx vitest run -t "should fallback to remote when data not found in cache"
 
+  dist: bun build src/index.ts --outdir dist --minify --target bun
+  build: bun build src/index.ts --outdir dist --target bun
+  run-dist: bun run dist/index.js
+
   ## DB
   db-push:  bunx drizzle-kit push
   db-gen: bunx drizzle-kit generate
@@ -19,9 +23,18 @@ tasks:
   db-ui: |
     bunx drizzle-kit studio # --port 3000 --verbose
 
-  
-  cache: |
-    curl -H "Authorization: Bearer {{.BEARER_AUTH_TOKEN}}" {{.API_HOST}}/books/remote/cache | jq
+  hi: |
+    curl -H "Authorization: Bearer {{.BEARER_AUTH_TOKEN}}" {{.API_HOST}}/tanshu/hi | jq
+
+  ## Docker
+  dk-build: docker build -t api-cache .
+  dk-run: |
+    task dk-build
+    docker rm -f api-cache || true
+    docker run --name api-cache --env-file .env.docker -p 3008:8080 -v $(pwd)/db/docker:/opt/data api-cache 
+    # https://api-cache.orb.local/
+    # http://api-cache.orb.local/
+    # docker exec -it api-cache sh
 
   ## Fly.io
   f-who: fly auth whoami
@@ -30,8 +43,8 @@ tasks:
   f-mk-vol: fly volumes create appdata --size 1 --region sin
   # 限制单实例，启用自动重启
   # fly scale count 1 --max-per-region 1
-  # fly deploy --ha=false
-  # fly ssh sftp shell
+  # fly deploy --ha=false --verbose
+  f-ftp: fly ssh sftp shell
   # put db/remote-cache.sqlite /opt/data/remote-cache.sqlite
   f-get-cache: fly ssh sftp get /opt/data/remote-cache.sqlite
 

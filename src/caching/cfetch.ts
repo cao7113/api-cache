@@ -45,7 +45,7 @@ export async function cfetch(
   if (useCache && !forceRemote) {
     const respData = await cacheClient.getFromCache(ckeys);
     if (respData) {
-      if (verbose) console.info(`hit cache ${respData} and return`);
+      if (verbose) console.info(`Hit cache ${respData} and return`);
       return Response.json(respData);
     } else {
       if (verbose) console.info(`miss cache and fallback`);
@@ -56,14 +56,18 @@ export async function cfetch(
   if (needRemote) {
     if (verbose)
       console.info(
-        `Requesting remote with ckeys ${JSON.stringify(ckeys, null, 2)}`
+        `Requesting Remote API with ckeys ${JSON.stringify(ckeys, null, 2)}`
       );
 
     // RequestInit???
     const resp = await fetch(url);
     if (verbose)
       console.debug(
-        `Fetched remote response with ckeys ${JSON.stringify(ckeys, null, 2)}`
+        `Fetched Remote API response with ckeys ${JSON.stringify(
+          ckeys,
+          null,
+          2
+        )}`
       );
 
     if (resp?.ok) {

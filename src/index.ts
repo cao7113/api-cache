@@ -100,7 +100,7 @@ const sui = swaggerUI({
           dom_id: "#swagger-ui",
           presets: [SwaggerUIBundle.presets.apis],
           requestInterceptor: (request) => {
-            if (window.location.href.startsWith("http://localhost") || window.location.href.startsWith("http://192.168.1.") ) {
+            if (window.location.href.startsWith("http://localhost") || window.location.href.startsWith("http://192.168.1.") || window.location.href.includes(".orb.local") ) {
               request.headers["Authorization"] = "Bearer ${
                 process.env.BEARER_AUTH_TOKEN
               }";
@@ -124,7 +124,7 @@ switch (runtime) {
   case "bun":
     const port = process.env.FLY_APP_NAME
       ? Number(process.env.PORT ?? 8080)
-      : 3000;
+      : Number(process.env.PORT ?? 3000);
     // https://hono.dev/docs/getting-started/bun#change-port-number
     finalApp = {
       fetch: app.fetch,
