@@ -9,8 +9,6 @@ import { swaggerUI } from "@hono/swagger-ui";
 import { version } from "../package.json";
 import { bearerMiddleware } from "./auth";
 import tanshu from "./tanshu/index";
-// use bun .env support instead
-// import "dotenv/config";
 
 const app = new OpenAPIHono<{
   // Specify the variable types to infer the `c.get('jwtPayload')`:
@@ -28,6 +26,58 @@ app.use("/tanshu/*", bearerMiddleware);
 app.route("/tanshu", tanshu);
 
 app
+  // bool test
+  .openapi(
+    createRoute({
+      tags: ["Tools"],
+      summary: "bool",
+      method: "get",
+      path: "/bool",
+      request: {
+        query: z.object({
+          // https://zod.dev/?id=coercion-for-primitives
+          // https://zod.dev/?id=preprocess
+          cached: z
+            .preprocess((val) => {
+              const strVal = String(val).toLowerCase();
+              if (strVal === "true") return true;
+              if (strVal === "false") return false;
+              if (typeof val === "boolean") return val;
+              return false;
+            }, z.boolean({ invalid_type_error: "Must be boolean, true/false (case insensitive)" }))
+            .openapi({
+              param: {
+                name: "cached",
+                in: "query",
+                description: "Accepts true/false (case insensitive)",
+                required: false,
+              },
+              example: false,
+            }),
+        }),
+      },
+      responses: {
+        200: {
+          description: "Query parameters",
+          content: {
+            "application/json": {
+              schema: z.object({
+                query: z.object({
+                  cached: z.boolean(),
+                }),
+              }),
+            },
+          },
+        },
+      },
+    }),
+    (c) => {
+      const query = c.req.valid("query");
+      return c.json({
+        query,
+      });
+    }
+  )
   // ping-pong
   .openapi(
     createRoute({
@@ -43,6 +93,7 @@ app
             "application/json": {
               schema: z.object({
                 message: z.literal("Pong"),
+                version: z.string(),
               }),
             },
           },
@@ -52,6 +103,7 @@ app
     (c) => {
       return c.json({
         message: "Pong",
+        version: version,
       });
     }
   );
@@ -100,7 +152,7 @@ const sui = swaggerUI({
           dom_id: "#swagger-ui",
           presets: [SwaggerUIBundle.presets.apis],
           requestInterceptor: (request) => {
-            if (window.location.href.startsWith("http://localhost") || window.location.href.startsWith("http://192.168.1.") || window.location.href.includes(".orb.local") ) {
+            if (window.location.href.startsWith("http://localhost") || window.location.href.startsWith("http://192.168.") || window.location.href.includes(".orb.local") ) {
               request.headers["Authorization"] = "Bearer ${
                 process.env.BEARER_AUTH_TOKEN
               }";

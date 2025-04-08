@@ -6,6 +6,7 @@ import { env } from "hono/adapter";
 import { z, createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import Api from "./api";
 import { ApiEndpoint } from "./types";
+import { type OptionalFetchOpts } from "../caching";
 
 // Specify the variable types to infer the `c.get('jwtPayload')`:
 type Variables = JwtVariables;
@@ -43,22 +44,84 @@ export const app = new OpenAPIHono<{
             }),
         }),
         query: z.object({
-          // enum support?
           path: z.string().openapi({
             param: {
               name: "path",
               in: "query",
             },
+            // todo enum support?
             example: ApiEndpoint.IsbnBase,
           }),
-          // boolean suuport
-          // cached: z.string().openapi({
-          //   param: {
-          //     name: "cached",
-          //     in: "query",
-          //   },
-          //   example: "true",
-          // }),
+          // https://zod.dev/?id=coercion-for-primitives
+          // https://zod.dev/?id=preprocess
+          forceremote: z
+            .preprocess((val) => {
+              const strVal = String(val).toLowerCase();
+              if (strVal === "true") return true;
+              if (strVal === "false") return false;
+              if (typeof val === "boolean") return val;
+              return false;
+            }, z.boolean({ invalid_type_error: "Must be boolean, true/false (case insensitive)" }))
+            .openapi({
+              param: {
+                name: "forceremote",
+                in: "query",
+                description: "Accepts true/false (case insensitive)",
+                required: false,
+              },
+              example: false,
+            }),
+          usecache: z
+            .preprocess((val) => {
+              const strVal = String(val).toLowerCase();
+              if (strVal === "true") return true;
+              if (strVal === "false") return false;
+              if (typeof val === "boolean") return val;
+              return true;
+            }, z.boolean({ invalid_type_error: "Must be boolean, true/false (case insensitive)" }))
+            .openapi({
+              param: {
+                name: "usecache",
+                in: "query",
+                description: "Accepts true/false (case insensitive)",
+                required: false,
+              },
+              example: true,
+            }),
+          fallbackremote: z
+            .preprocess((val) => {
+              const strVal = String(val).toLowerCase();
+              if (strVal === "true") return true;
+              if (strVal === "false") return false;
+              if (typeof val === "boolean") return val;
+              return true;
+            }, z.boolean({ invalid_type_error: "Must be boolean, true/false (case insensitive)" }))
+            .openapi({
+              param: {
+                name: "fallbackremote",
+                in: "query",
+                description: "Accepts true/false (case insensitive)",
+                required: false,
+              },
+              example: true,
+            }),
+          verbose: z
+            .preprocess((val) => {
+              const strVal = String(val).toLowerCase();
+              if (strVal === "true") return true;
+              if (strVal === "false") return false;
+              if (typeof val === "boolean") return val;
+              return true;
+            }, z.boolean({ invalid_type_error: "Must be boolean, true/false (case insensitive)" }))
+            .openapi({
+              param: {
+                name: "verbose",
+                in: "query",
+                description: "Accepts true/false (case insensitive)",
+                required: false,
+              },
+              example: true,
+            }),
         }),
       },
       security: [
@@ -75,13 +138,17 @@ export const app = new OpenAPIHono<{
     }),
     async (c) => {
       const { isbn } = c.req.valid("param");
-      const { path } = c.req.valid("query");
+      const { path, forceremote, usecache, fallbackremote, verbose } =
+        c.req.valid("query");
       const apiClient = c.get("apiClient");
 
-      // todo add opts
-      const resp = await apiClient.getIsbnResponse(isbn, path, {
-        verbose: true,
-      });
+      const opts: OptionalFetchOpts = {
+        forceRemote: forceremote,
+        useCache: usecache,
+        fallbackWhenMissCache: fallbackremote,
+        verbose: verbose,
+      };
+      const resp = await apiClient.getIsbnResponse(isbn, path, opts);
       return resp;
     }
   )

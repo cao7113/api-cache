@@ -1,4 +1,4 @@
-// todo improve types support
+// todo improve types
 
 export const VENDOR_NAME = "tanshu";
 

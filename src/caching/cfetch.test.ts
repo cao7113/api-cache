@@ -32,8 +32,7 @@ describe("cfetch", () => {
     });
 
     // Spy on console.info
-    // todo
-    // vi.spyOn(console, "info").mockImplementation(() => {});
+    vi.spyOn(console, "info").mockImplementation(() => {});
   });
 
   afterEach(() => {

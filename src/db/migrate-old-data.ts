@@ -3,7 +3,7 @@ import { drizzle } from "drizzle-orm/bun-sqlite";
 import { db } from "./sqlite-setup";
 import { remoteResponsesTable } from "./schema";
 
-const oldDbFile = "db/tanshu-old-cache.sqlite";
+const oldDbFile = "db/backup/tanshu-old-cache.sqlite";
 const oldDb = drizzle(oldDbFile);
 const oldCacheTable = sqliteTable("tanshu_isbn_books", {
   key: text("key", { mode: "text" }).notNull(),
