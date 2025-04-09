@@ -4,9 +4,9 @@ import { env } from "hono/adapter";
 
 // NOTE: The z object should be imported from @hono/zod-openapi other than from hono
 import { z, createRoute, OpenAPIHono } from "@hono/zod-openapi";
-import Api from "./api";
 import { ApiEndpoint } from "./types";
 import { type OptionalFetchOpts } from "../caching";
+import Api from "./api";
 
 // Specify the variable types to infer the `c.get('jwtPayload')`:
 type Variables = JwtVariables;

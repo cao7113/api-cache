@@ -1,7 +1,6 @@
 import {
   BookData,
   ApiEndpoint,
-  RespData,
   TsBookResp,
   BookInfoProvider,
   VENDOR_NAME,

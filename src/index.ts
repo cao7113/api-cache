@@ -8,7 +8,7 @@ import { swaggerUI } from "@hono/swagger-ui";
 
 import { version } from "../package.json";
 import { bearerMiddleware } from "./auth";
-import tanshu from "./tanshu/index";
+import tanshu from "./tanshu";
 
 const app = new OpenAPIHono<{
   // Specify the variable types to infer the `c.get('jwtPayload')`:
@@ -26,58 +26,6 @@ app.use("/tanshu/*", bearerMiddleware);
 app.route("/tanshu", tanshu);
 
 app
-  // bool test
-  .openapi(
-    createRoute({
-      tags: ["Tools"],
-      summary: "bool",
-      method: "get",
-      path: "/bool",
-      request: {
-        query: z.object({
-          // https://zod.dev/?id=coercion-for-primitives
-          // https://zod.dev/?id=preprocess
-          cached: z
-            .preprocess((val) => {
-              const strVal = String(val).toLowerCase();
-              if (strVal === "true") return true;
-              if (strVal === "false") return false;
-              if (typeof val === "boolean") return val;
-              return false;
-            }, z.boolean({ invalid_type_error: "Must be boolean, true/false (case insensitive)" }))
-            .openapi({
-              param: {
-                name: "cached",
-                in: "query",
-                description: "Accepts true/false (case insensitive)",
-                required: false,
-              },
-              example: false,
-            }),
-        }),
-      },
-      responses: {
-        200: {
-          description: "Query parameters",
-          content: {
-            "application/json": {
-              schema: z.object({
-                query: z.object({
-                  cached: z.boolean(),
-                }),
-              }),
-            },
-          },
-        },
-      },
-    }),
-    (c) => {
-      const query = c.req.valid("query");
-      return c.json({
-        query,
-      });
-    }
-  )
   // ping-pong
   .openapi(
     createRoute({
@@ -135,7 +83,7 @@ app.doc31("/openapi", (c) => {
   };
 });
 
-const sui = swaggerUI({
+const swUi = swaggerUI({
   url: "/openapi",
   title: "API Docs",
   // https://github.com/honojs/middleware/blob/main/packages/swagger-ui/README.md#options
@@ -164,13 +112,13 @@ const sui = swaggerUI({
     </div>
   `,
 });
-app.get("/", sui);
+app.get("/", swUi);
 
 // console.log(JSON.stringify(app, null, 2));
 const runtime = getRuntimeKey();
 console.log(`App Version: ${version} on Runtime: ${runtime}`);
 
-let finalApp;
+let finalApp: { fetch: any };
 
 switch (runtime) {
   case "bun":
