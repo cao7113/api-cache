@@ -3,7 +3,7 @@
 import { Command } from "commander";
 import Api from "../src/tanshu/api";
 import { version } from "../../package.json";
-import { ApiEndpoint } from "../src/tanshu/types";
+import { ApiEndpoints } from "../src/tanshu/types";
 
 const demoISBN = process.env.DEMO_ISBN;
 const tanshuApiKey = process.env.TANSHU_API_KEY;
@@ -40,7 +40,7 @@ program
   .option("-v, --verbose", "verbose log", false)
   .action(async (isbn, opts) => {
     isbn = isbn || demoISBN;
-    const endpoint = opts.pro ? ApiEndpoint.IsbnPro : ApiEndpoint.IsbnBase;
+    const endpoint = opts.pro ? ApiEndpoints.IsbnPro : ApiEndpoints.IsbnBase;
     const client = new Api(tanshuApiKey, opts.verbose);
     const info = await client.getBookInfo(isbn, endpoint, {
       forceRemote: opts.remote,
@@ -64,7 +64,7 @@ program
   .option("-v, --verbose", "verbose log", false)
   .action(async (isbn, opts) => {
     isbn = isbn || demoISBN;
-    const endpoint = opts.pro ? ApiEndpoint.IsbnPro : ApiEndpoint.IsbnBase;
+    const endpoint = opts.pro ? ApiEndpoints.IsbnPro : ApiEndpoints.IsbnBase;
     const client = new Api(tanshuApiKey, opts.verbose);
     const info = await client.getIsbnInfo(isbn, endpoint, {
       forceRemote: opts.remote,

@@ -118,7 +118,7 @@ app.get("/", swUi);
 const runtime = getRuntimeKey();
 console.log(`App Version: ${version} on Runtime: ${runtime}`);
 
-let finalApp: { fetch: any };
+let finalApp: { fetch: any; idleTimeout?: number; port?: number };
 
 switch (runtime) {
   case "bun":

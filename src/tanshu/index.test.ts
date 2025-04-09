@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import Api from "./api";
-import { ApiEndpoint } from "./types";
+import { ApiEndpoints } from "./types";
 import { cfetch } from "../caching";
 
 vi.mock("../caching", () => {
@@ -12,7 +12,7 @@ vi.mock("../caching", () => {
 describe("Api", () => {
   const dummyApiKey = "dummy-key";
   const isbn = "9787115424914";
-  const path = ApiEndpoint.IsbnBase;
+  const path = ApiEndpoints.IsbnBase;
   const opts = {
     forceRemote: false,
     useCache: true,

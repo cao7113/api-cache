@@ -4,12 +4,24 @@ import { env } from "hono/adapter";
 
 // NOTE: The z object should be imported from @hono/zod-openapi other than from hono
 import { z, createRoute, OpenAPIHono } from "@hono/zod-openapi";
-import { ApiEndpoint } from "./types";
+import { ApiEndpoints } from "./types";
 import { type OptionalFetchOpts } from "../caching";
 import Api from "./api";
 
 // Specify the variable types to infer the `c.get('jwtPayload')`:
 type Variables = JwtVariables;
+
+const ApiEndpointsSchema = z.nativeEnum(ApiEndpoints);
+
+// https://zod.dev/?id=coercion-for-primitives
+// https://zod.dev/?id=preprocess
+const BoolSchema = z.preprocess((val) => {
+  const strVal = String(val).toLowerCase();
+  if (strVal === "true") return true;
+  if (strVal === "false") return false;
+  if (typeof val === "boolean") return val;
+  return false;
+}, z.boolean({ invalid_type_error: "Must be boolean, true/false (case insensitive)" }));
 
 const addClients = createMiddleware(async (c, next) => {
   const envs = env(c);
@@ -44,33 +56,22 @@ export const app = new OpenAPIHono<{
             }),
         }),
         query: z.object({
-          path: z.string().openapi({
+          path: ApiEndpointsSchema.openapi({
             param: {
               name: "path",
               in: "query",
             },
-            // todo enum support?
-            example: ApiEndpoint.IsbnBase,
+            example: ApiEndpointsSchema.enum.IsbnBase,
           }),
-          // https://zod.dev/?id=coercion-for-primitives
-          // https://zod.dev/?id=preprocess
-          forceremote: z
-            .preprocess((val) => {
-              const strVal = String(val).toLowerCase();
-              if (strVal === "true") return true;
-              if (strVal === "false") return false;
-              if (typeof val === "boolean") return val;
-              return false;
-            }, z.boolean({ invalid_type_error: "Must be boolean, true/false (case insensitive)" }))
-            .openapi({
-              param: {
-                name: "forceremote",
-                in: "query",
-                description: "Accepts true/false (case insensitive)",
-                required: false,
-              },
-              example: false,
-            }),
+          forceremote: BoolSchema.openapi({
+            param: {
+              name: "forceremote",
+              in: "query",
+              description: "Accepts true/false (case insensitive)",
+              required: false,
+            },
+            example: false,
+          }),
           usecache: z
             .preprocess((val) => {
               const strVal = String(val).toLowerCase();

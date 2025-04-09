@@ -2,7 +2,7 @@
 
 export const VENDOR_NAME = "tanshu";
 
-export enum ApiEndpoint {
+export enum ApiEndpoints {
   // https://www.tanshuapi.com/market/detail-134
   // ISBN数据查询_基础版
   // 通过请求13位的ISBN编码可以查询图书相关信息，包括图书名称、作者、出版社、出版时间、价格以及书籍封面等信息。
@@ -51,5 +51,5 @@ export type RespData = {
 };
 
 export interface BookInfoProvider {
-  getIsbnInfo(isbn: string, reqPath: ApiEndpoint, options: any): Promise<any>;
+  getIsbnInfo(isbn: string, reqPath: ApiEndpoints, options: any): Promise<any>;
 }

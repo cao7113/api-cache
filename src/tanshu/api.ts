@@ -1,6 +1,6 @@
 import {
   BookData,
-  ApiEndpoint,
+  ApiEndpoints,
   TsBookResp,
   BookInfoProvider,
   VENDOR_NAME,
@@ -21,7 +21,7 @@ export default class Api implements BookInfoProvider {
 
   async getIsbnInfo(
     isbn: string,
-    reqPath: ApiEndpoint = ApiEndpoint.IsbnBase,
+    reqPath: ApiEndpoints = ApiEndpoints.IsbnBase,
     opts: OptionalFetchOpts = { verbose: this.verbose }
   ): Promise<TsBookResp> {
     const resp = await this.getIsbnResponse(isbn, reqPath, opts);
@@ -31,7 +31,7 @@ export default class Api implements BookInfoProvider {
 
   async getBookInfo(
     isbn: string,
-    reqPath: ApiEndpoint = ApiEndpoint.IsbnBase,
+    reqPath: ApiEndpoints = ApiEndpoints.IsbnBase,
     opts: OptionalFetchOpts = { verbose: this.verbose }
   ): Promise<BookData> {
     const info = await this.getIsbnInfo(isbn, reqPath, opts);
@@ -47,7 +47,7 @@ export default class Api implements BookInfoProvider {
 
   async getIsbnResponse(
     isbn: string,
-    reqPath: ApiEndpoint = ApiEndpoint.IsbnBase,
+    reqPath: ApiEndpoints = ApiEndpoints.IsbnBase,
     opts: OptionalFetchOpts = { verbose: this.verbose }
   ): Promise<Response> {
     const baseUrl = `${apiUrl}${reqPath}?isbn=${isbn}`;
