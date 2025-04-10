@@ -2,7 +2,7 @@
 
 import { Command } from "commander";
 import Api from "../src/tanshu/api";
-import { version } from "../../package.json";
+import { version } from "../package.json";
 import { ApiEndpoints } from "../src/tanshu/types";
 
 const demoISBN = process.env.DEMO_ISBN;

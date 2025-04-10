@@ -7,6 +7,7 @@ import {
 } from "./types";
 import { db, dbFilePath } from "../db/sqlite-setup";
 import { remoteResponsesTable } from "../db/schema";
+import { promises as fs } from "fs";
 
 export class SqliteCacheClient implements CacheClient {
   async getFromCache(ckeys: CacheKeys): Promise<any | null> {
@@ -64,7 +65,7 @@ export class SqliteCacheClient implements CacheClient {
     return await db?.$count(remoteResponsesTable);
   }
 
-  async getRecentCacheEntries(
+  async getLatestItems(
     keys?: OptionalCacheKeys,
     limit: number = 5
   ): Promise<CachedResponse[]> {
@@ -101,11 +102,18 @@ export class SqliteCacheClient implements CacheClient {
     });
   }
 
-  async getCacheInfo(keys?: OptionalCacheKeys, limit: number = 3) {
+  async getCacheInfo() {
+    if (!dbFilePath) {
+      throw new Error("dbFilePath is undefined");
+    }
+    const stats = await fs.stat(dbFilePath);
+    const fileSize = stats.size / (1024 * 1024);
+    const totalCount = await this.getTotalCount();
+
     return {
+      total_count: totalCount,
       dbfile: dbFilePath,
-      total_count: await this.getTotalCount(),
-      latest_items: await this.getRecentCacheEntries(keys, limit),
+      dbfile_size_in_m: fileSize,
     };
   }
 }

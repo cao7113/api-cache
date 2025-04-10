@@ -3,19 +3,9 @@ import { env } from "hono/adapter";
 
 // NOTE: The z object should be imported from @hono/zod-openapi other than from hono
 import { z, createRoute, OpenAPIHono } from "@hono/zod-openapi";
-import { cacheClient, type CacheKeys } from "./index";
+import { cacheClient } from "./index";
 
 type Variables = {};
-
-// https://zod.dev/?id=coercion-for-primitives
-// https://zod.dev/?id=preprocess
-const BoolSchema = z.preprocess((val) => {
-  const strVal = String(val).toLowerCase();
-  if (strVal === "true") return true;
-  if (strVal === "false") return false;
-  if (typeof val === "boolean") return val;
-  return false;
-}, z.boolean({ invalid_type_error: "Must be boolean, true/false (case insensitive)" }));
 
 export const app = new OpenAPIHono<{
   Variables: Variables;
@@ -27,6 +17,37 @@ export const app = new OpenAPIHono<{
       summary: "Caching info",
       method: "get",
       path: "/info",
+      request: {},
+      security: [
+        {
+          Bearer: [],
+        },
+      ],
+      responses: {
+        200: {
+          description: "Success message",
+          content: {
+            "application/json": {
+              schema: z.object({
+                total_count: z.number(),
+              }),
+            },
+          },
+        },
+      },
+    }),
+    async (c) => {
+      const info = await cacheClient.getCacheInfo();
+      return c.json(info);
+    }
+  )
+  // latest items
+  .openapi(
+    createRoute({
+      tags: ["Caching"],
+      summary: "latest items",
+      method: "get",
+      path: "/latest",
       request: {
         query: z.object({
           vendor: z
@@ -94,7 +115,7 @@ export const app = new OpenAPIHono<{
     async (c) => {
       const { vendor, path, pathkey, limit } = c.req.valid("query");
       const ckeys = { vendor, path, pathKey: pathkey };
-      const info = await cacheClient.getCacheInfo(ckeys, limit);
+      const info = await cacheClient.getLatestItems(ckeys, limit);
       return c.json(info);
     }
   );

@@ -1,6 +1,8 @@
 #! /usr/bin/env bun
 import { Command } from "commander";
-import { version } from "../../package.json";
+import { z } from "zod";
+import { version } from "../package.json";
+import { cacheClient } from "../src/caching";
 
 // https://github.com/tj/commander.js?tab=readme-ov-file#commanderjs
 const program = new Command()
@@ -12,11 +14,27 @@ program
   .command("info")
   .description("Get Cache info")
   .alias("i")
-  .option("-l, --limit <number>", "items count", "1")
+  .action(async () => {
+    const info = await cacheClient.getCacheInfo();
+    console.log(`${JSON.stringify(info, null, 2)}`);
+  });
+
+program
+  .command("list")
+  .description("List latest items")
+  .alias("ls")
+  .option("--vendor <string>", "vendor name", "tanshu")
+  .option("--path <string>", "path name", null)
+  .option("--pathkey <string>", "vendor name", null)
+  .option("-l, --limit <number>", "items count", 1)
   .option("-v, --verbose", "verbose log", false)
   .action(async (opts) => {
-    console.log("Cache functionality is not available when using direct API");
-    console.log("Please use the web API endpoint for cache operations");
+    const { vendor, path, pathkey, verbose } = opts;
+    // console.log("opts", opts);
+    const ckeys = { vendor, path, verbose, pathKey: pathkey };
+    const limit = z.coerce.number().int().min(1).parse(opts.limit);
+    const info = await cacheClient.getLatestItems(ckeys, limit);
+    console.log(`${JSON.stringify(info, null, 2)}`);
   });
 
 program.parse();
