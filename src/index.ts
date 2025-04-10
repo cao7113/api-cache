@@ -9,6 +9,7 @@ import { swaggerUI } from "@hono/swagger-ui";
 import { version } from "../package.json";
 import { bearerMiddleware } from "./auth";
 import tanshu from "./tanshu";
+import cachingWeb from "./caching/web";
 
 const app = new OpenAPIHono<{
   // Specify the variable types to infer the `c.get('jwtPayload')`:
@@ -24,6 +25,9 @@ app.use(logger(), timing());
 
 app.use("/tanshu/*", bearerMiddleware);
 app.route("/tanshu", tanshu);
+
+app.use("/caching/*", bearerMiddleware);
+app.route("/caching", cachingWeb);
 
 app
   // ping-pong

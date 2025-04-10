@@ -1,5 +1,10 @@
 import { eq, and, desc } from "drizzle-orm";
-import { CacheClient, CachedResponse, CacheKeys } from "./types";
+import {
+  CacheClient,
+  CachedResponse,
+  CacheKeys,
+  OptionalCacheKeys,
+} from "./types";
 import { db, dbFilePath } from "../db/sqlite-setup";
 import { remoteResponsesTable } from "../db/schema";
 
@@ -55,26 +60,40 @@ export class SqliteCacheClient implements CacheClient {
     }
   }
 
+  async getTotalCount() {
+    return await db?.$count(remoteResponsesTable);
+  }
+
   async getRecentCacheEntries(
-    path: string,
+    keys?: OptionalCacheKeys,
     limit: number = 5
   ): Promise<CachedResponse[]> {
     if (!db) return [];
 
-    const rows = await db
+    let query = db
       .select({
         pathKey: remoteResponsesTable.pathKey,
         path: remoteResponsesTable.path,
         responseData: remoteResponsesTable.responseData,
         timestamp: remoteResponsesTable.timestamp,
       })
-      .from(remoteResponsesTable)
-      .where(eq(remoteResponsesTable.path, path))
+      .from(remoteResponsesTable);
+    if (keys?.vendor) {
+      query = query.where(eq(remoteResponsesTable.vendor, keys.vendor));
+    }
+    if (keys?.path) {
+      query = query.where(eq(remoteResponsesTable.path, keys.path));
+    }
+    if (keys?.pathKey) {
+      query = query.where(eq(remoteResponsesTable.pathKey, keys.pathKey));
+    }
+    const rows = await query
       .orderBy(desc(remoteResponsesTable.timestamp))
-      .limit(limit);
+      .limit(limit)
+      .all();
 
     return rows.map((row) => {
-      const parsed = JSON.parse(row.responseData);
+      const parsed = row.responseData;
       return {
         data: parsed.data,
         timestamp: new Date(row.timestamp).toISOString(),
@@ -82,10 +101,11 @@ export class SqliteCacheClient implements CacheClient {
     });
   }
 
-  async getCacheInfo(path: string, limit: number = 3) {
+  async getCacheInfo(keys?: OptionalCacheKeys, limit: number = 3) {
     return {
       dbfile: dbFilePath,
-      latest_items: await this.getRecentCacheEntries(path, limit),
+      total_count: await this.getTotalCount(),
+      latest_items: await this.getRecentCacheEntries(keys, limit),
     };
   }
 }

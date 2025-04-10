@@ -33,7 +33,7 @@ const addClients = createMiddleware(async (c, next) => {
 export const app = new OpenAPIHono<{
   Variables: Variables;
 }>()
-  // get book-info
+  // get book-info by isbn
   .openapi(
     createRoute({
       summary: "Get book info by isbn",

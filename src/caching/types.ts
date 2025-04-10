@@ -17,9 +17,11 @@ export interface CacheClient {
   saveToCache(ckyes: CacheKeys, value: any): Promise<void>;
 
   getRecentCacheEntries(
-    path: string,
+    keys?: OptionalCacheKeys,
     limit?: number
   ): Promise<Array<CachedResponse>>;
 
-  getCacheInfo(path: string, limit?: number): Promise<any>;
+  getCacheInfo(keys?: OptionalCacheKeys, limit?: number): Promise<any>;
+
+  getTotalCount(): Promise<any>;
 }

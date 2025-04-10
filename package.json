@@ -1,6 +1,6 @@
 {
   "name": "api-cache",
-  "version": "0.0.2",
+  "version": "0.0.1",
   "description": "API Cache for external service",
   "type": "module",
   "scripts": {
@@ -19,8 +19,8 @@
   "devDependencies": {
     "@types/bun": "^1.2.8",
     "better-sqlite3": "^11.9.1",
-    "drizzle-kit": "^0.30.6",
     "commander": "^13.1.0",
+    "drizzle-kit": "^0.30.6",
     "vitest": "latest"
   }
 }

@@ -7,6 +7,10 @@ vi.mock("./tanshu", () => {
   const app = new OpenAPIHono();
   return { default: app };
 });
+vi.mock("./caching/web", () => {
+  const app = new OpenAPIHono();
+  return { default: app };
+});
 
 describe("Ping endpoint", () => {
   it("should return Pong and version", async () => {
