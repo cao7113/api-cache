@@ -65,7 +65,7 @@ export const app = new OpenAPIHono<{
             },
             example: ApiEndpointsSchema.enum.IsbnBase,
           }),
-          forceremote: BoolSchema.openapi({
+          forceremote: BoolSchema.default(false).openapi({
             param: {
               name: "forceremote",
               in: "query",
@@ -74,57 +74,33 @@ export const app = new OpenAPIHono<{
             },
             example: false,
           }),
-          usecache: z
-            .preprocess((val) => {
-              const strVal = String(val).toLowerCase();
-              if (strVal === "true") return true;
-              if (strVal === "false") return false;
-              if (typeof val === "boolean") return val;
-              return true;
-            }, z.boolean({ invalid_type_error: "Must be boolean, true/false (case insensitive)" }))
-            .openapi({
-              param: {
-                name: "usecache",
-                in: "query",
-                description: "Accepts true/false (case insensitive)",
-                required: false,
-              },
-              example: true,
-            }),
-          fallbackremote: z
-            .preprocess((val) => {
-              const strVal = String(val).toLowerCase();
-              if (strVal === "true") return true;
-              if (strVal === "false") return false;
-              if (typeof val === "boolean") return val;
-              return true;
-            }, z.boolean({ invalid_type_error: "Must be boolean, true/false (case insensitive)" }))
-            .openapi({
-              param: {
-                name: "fallbackremote",
-                in: "query",
-                description: "Accepts true/false (case insensitive)",
-                required: false,
-              },
-              example: true,
-            }),
-          verbose: z
-            .preprocess((val) => {
-              const strVal = String(val).toLowerCase();
-              if (strVal === "true") return true;
-              if (strVal === "false") return false;
-              if (typeof val === "boolean") return val;
-              return true;
-            }, z.boolean({ invalid_type_error: "Must be boolean, true/false (case insensitive)" }))
-            .openapi({
-              param: {
-                name: "verbose",
-                in: "query",
-                description: "Accepts true/false (case insensitive)",
-                required: false,
-              },
-              example: true,
-            }),
+          usecache: BoolSchema.default(true).openapi({
+            param: {
+              name: "usecache",
+              in: "query",
+              description: "Accepts true/false (case insensitive)",
+              required: false,
+            },
+            example: true,
+          }),
+          fallbackremote: BoolSchema.default(true).openapi({
+            param: {
+              name: "fallbackremote",
+              in: "query",
+              description: "Accepts true/false (case insensitive)",
+              required: false,
+            },
+            example: true,
+          }),
+          verbose: BoolSchema.default(false).openapi({
+            param: {
+              name: "verbose",
+              in: "query",
+              description: "Accepts true/false (case insensitive)",
+              required: false,
+            },
+            example: false,
+          }),
         }),
       },
       security: [
