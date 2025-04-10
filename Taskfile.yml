@@ -15,9 +15,16 @@ tasks:
   build: bun build src/index.ts --outdir dist --target bun
   rel: bun run test && bun run release
   rel-skip-ci: standard-version --skip.commit
-
+  # git push --follow-tags origin main
+  
+  ping: |
+    curl {{.API_HOST}}/ping | jq
+  ping-p: ENV=prod task ping
+  
   hi: |
     curl -H "Authorization: Bearer {{.BEARER_AUTH_TOKEN}}" {{.API_HOST}}/tanshu/hi | jq
+  isbn: |
+    curl -H "Authorization: Bearer {{.BEARER_AUTH_TOKEN}}" {{.API_HOST}}/tanshu/isbn/9787115424914 | jq
 
   ## DB
   db-push:  bunx drizzle-kit push
@@ -32,8 +39,6 @@ tasks:
   # By default, Drizzle Studio will be launched on the https://local.drizzle.studio host, and studio server will be launched on 127.0.0.1 host but you can specify any host you want yarn drizzle-kit studio --host 0.0.0.0
   db-ui: |
     bunx drizzle-kit studio # --port 3000 --verbose
-
-
 
   ## Docker
   dk-build: docker build -t api-cache .

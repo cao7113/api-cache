@@ -56,7 +56,9 @@ export const app = new OpenAPIHono<{
             }),
         }),
         query: z.object({
-          path: ApiEndpointsSchema.openapi({
+          path: ApiEndpointsSchema.default(
+            ApiEndpointsSchema.enum.IsbnBase
+          ).openapi({
             param: {
               name: "path",
               in: "query",
