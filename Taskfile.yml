@@ -13,6 +13,8 @@ tasks:
   dist: bun build src/index.ts --outdir dist --minify --target bun
   run-dist: bun run dist/index.js
   build: bun build src/index.ts --outdir dist --target bun
+  rel: bun run test && bun run release
+  rel-skip-ci: standard-version --skip.commit
 
   hi: |
     curl -H "Authorization: Bearer {{.BEARER_AUTH_TOKEN}}" {{.API_HOST}}/tanshu/hi | jq
