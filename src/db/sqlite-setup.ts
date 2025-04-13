@@ -5,7 +5,7 @@ import * as path from "path";
 
 // https://bun.sh/guides/ecosystem/drizzle
 
-const verbose = process.env.VERBOSE || false;
+const verbose: boolean = process.env.VERBOSE || false;
 
 // Get database file path from environment variables
 const dbFilePath = process.env.DB_FILE_PATH;
@@ -19,7 +19,7 @@ let db: ReturnType<typeof drizzle> | null = null;
 
 dbRaw = new Database(dbFilePath);
 // db = drizzle({ client: dbRaw });
-db = drizzle(dbRaw);
+db = drizzle(dbRaw, { logger: verbose });
 
 if (verbose) {
   // Ensure we have an absolute path for the DB file
